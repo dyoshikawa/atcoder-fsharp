@@ -1,5 +1,6 @@
 // Learn more about F# at http://fsharp.org
 open System
+open System.Collections.Generic
 
 let swap (arr : 'a []) a b =
     let newArr = Array.copy arr
@@ -32,12 +33,12 @@ let binarySearch (arr : 'a []) (key : 'a) =
     loop arr key 0 arr.Length
 
 type Heap() =
-    let mutable data : int [] = [||]
+    let mutable data : List<int> = new List<int>()
     member this.Data = data
 
     member this.Push(el : int) =
-        data <- Array.append data [| el |]
-        let rec loop (data : int []) (nowIndex : int) =
+        data.Add(el)
+        let rec loop (data : List<int>) (nowIndex : int) =
             if nowIndex = 0 then data
             else
                 let isLeft = nowIndex % 2 = 1
@@ -53,20 +54,24 @@ type Heap() =
                     | false -> (nowIndex - 1) / 2
 
                 if maxChild > data.[parentIndex] then
-                    let newData = swap data nowIndex parentIndex
-                    loop newData parentIndex
+                    let swap = data.[nowIndex]
+                    data.[nowIndex] <- data.[parentIndex]
+                    data.[parentIndex] <- swap
+                    loop data parentIndex
                 else data
-        data <- loop data (data.Length - 1)
+        data <- loop data (data.Count - 1)
 
     member this.Pop() =
         let popped = data.[0]
-        let lastIndex = data.Length - 1
-        data <- swap data 0 lastIndex
-        data <- if lastIndex = 0 then [||]
-                else data.[..lastIndex - 1]
+        let lastIndex = data.Count - 1
+        if lastIndex > 0 then
+            let swap = data.[0]
+            data.[0] <- data.[lastIndex]
+            data.[lastIndex] <- swap
+            data.RemoveAt(lastIndex)
         let newLastIndex = lastIndex - 1
 
-        let rec loop (data : int []) (nowIndex : int) =
+        let rec loop (data : List<int>) (nowIndex : int) =
             if newLastIndex < 0 then data
             else
                 let leftChildIndex =
@@ -97,22 +102,22 @@ type Heap() =
                         | _ -> index
 
                 if data.[nowIndex] < data.[maxChildIndex] then
-                    let newData = swap data nowIndex maxChildIndex
-                    loop newData maxChildIndex
+                    let swap = data.[nowIndex]
+                    data.[nowIndex] <- data.[maxChildIndex]
+                    data.[maxChildIndex] <- swap
+                    loop data maxChildIndex
                 else data
         data <- loop data 0
         popped
 
 [<EntryPoint>]
 let main _argv =
-    let [| _; m |] = stdin.ReadLine().Split(' ') |> Array.map int
+    let [| n; m |] = stdin.ReadLine().Split(' ') |> Array.map int
     let aList = stdin.ReadLine().Split(' ') |> Array.map int
-    let heap = new Heap()
-    for a in aList do
-        heap.Push(int a)
+    let mutable heap = Set.ofArray (Array.zip aList [|0..n-1|])
     for _ in 1..m do
-        let a = heap.Pop()
-        let newA = a / 2
-        heap.Push(newA)
-    bigSum heap.Data |> printfn "%d"
+        let (x, y) as a = Set.maxElement heap
+        heap <- Set.remove a heap
+        heap <- Set.add (x / 2, y) heap
+    Set.fold (fun s (x, _) -> s + int64 x) 0L heap |> printfn "%d"
     0 // return an int exit code
