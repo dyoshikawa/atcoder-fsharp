@@ -2,11 +2,17 @@
 open System
 
 let swap (arr : 'a []) a b =
-    let mutable newArr = Array.copy arr
+    let newArr = Array.copy arr
     let tmp = newArr.[a]
     newArr.[a] <- newArr.[b]
     newArr.[b] <- tmp
     newArr
+
+let bigSum (arr : int []) =
+    let rec loop (i : int) (sum : int64) =
+        if i < 0 then sum
+        else sum + int64 arr.[i] |> loop (i - 1)
+    loop (arr.Length - 1) (int64 0)
 
 let factorial (num : int) =
     let rec loop acc num =
@@ -27,6 +33,7 @@ let binarySearch (arr : 'a []) (key : 'a) =
 
 type Heap() =
     let mutable data : int [] = [||]
+    member this.Data = data
 
     member this.Push(el : int) =
         data <- Array.append data [| el |]
@@ -98,9 +105,14 @@ type Heap() =
 
 [<EntryPoint>]
 let main _argv =
-    let a = new Heap()
-    for i in 1..100 do
-        a.Push(i)
-    for i in 1..100 do
-        printfn "%d" (a.Pop())
-    0 // return an integer exit code
+    let [| _; m |] = stdin.ReadLine().Split(' ') |> Array.map int
+    let aList = stdin.ReadLine().Split(' ') |> Array.map int
+    let heap = new Heap()
+    for a in aList do
+        heap.Push(int a)
+    for _ in 1..m do
+        let a = heap.Pop()
+        let newA = a / 2
+        heap.Push(newA)
+    bigSum heap.Data |> printfn "%d"
+    0 // return an int exit code
