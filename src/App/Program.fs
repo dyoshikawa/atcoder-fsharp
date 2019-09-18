@@ -12,7 +12,7 @@ let swap (arr : 'a []) a b =
 let bigSum (arr : int []) =
     let rec loop (i : int) (sum : int64) =
         if i < 0 then sum
-        else sum + int64 arr.[i] |> loop (i - 1)
+        else loop (i - 1) (sum + int64 arr.[i])
     loop (arr.Length - 1) (int64 0)
 
 let factorial (num : int) =
@@ -64,11 +64,10 @@ type Heap() =
     member this.Pop() =
         let popped = data.[0]
         let lastIndex = data.Count - 1
-        if lastIndex > 0 then
-            let swap = data.[0]
-            data.[0] <- data.[lastIndex]
-            data.[lastIndex] <- swap
-            data.RemoveAt(lastIndex)
+        let swap = data.[0]
+        data.[0] <- data.[lastIndex]
+        data.[lastIndex] <- swap
+        data.RemoveAt(lastIndex)
         let newLastIndex = lastIndex - 1
 
         let rec loop (data : List<int>) (nowIndex : int) =
@@ -112,12 +111,13 @@ type Heap() =
 
 [<EntryPoint>]
 let main _argv =
-    let [| n; m |] = stdin.ReadLine().Split(' ') |> Array.map int
+    let [| _; m |] = stdin.ReadLine().Split(' ') |> Array.map int
     let aList = stdin.ReadLine().Split(' ') |> Array.map int
-    let mutable heap = Set.ofArray (Array.zip aList [|0..n-1|])
+    let heap = new Heap()
+    for a in aList do
+        heap.Push(a)
     for _ in 1..m do
-        let (x, y) as a = Set.maxElement heap
-        heap <- Set.remove a heap
-        heap <- Set.add (x / 2, y) heap
-    Set.fold (fun s (x, _) -> s + int64 x) 0L heap |> printfn "%d"
+        let a = heap.Pop()
+        heap.Push(a / 2)
+    bigSum (heap.Data.ToArray()) |> printfn "%d"
     0 // return an int exit code
