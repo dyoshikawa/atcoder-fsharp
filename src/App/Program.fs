@@ -1,5 +1,8 @@
 // Learn more about F# at http://fsharp.org
 open System
+open System.Collections
+open System.Collections.Generic
+open System.Collections.Generic
 open System.Collections.Generic
 
 let swap (arr : 'a []) a b =
@@ -8,6 +11,11 @@ let swap (arr : 'a []) a b =
     newArr.[a] <- newArr.[b]
     newArr.[b] <- tmp
     newArr
+
+//let sqrt64 (n : int64) =
+//    let rec loop (n : float) =
+//        let newN = n - (n + n - 2) / (x * 2)
+        
 
 let bigSum (arr : int []) =
     let rec loop (i : int) (sum : int64) =
@@ -109,15 +117,137 @@ type Heap() =
         data <- loop data 0
         popped
 
+let makeGcd (a : int) (b : int) =
+    let rec loop (a : int) (b : int) =
+        if b = 0 then
+            a
+        else
+            loop b (a % b)
+    if a < b then
+        loop b a
+    else
+        loop a b
+
+let makeGcd64 (a : int64) (b : int64) =
+    let rec loop (a : int64) (b : int64) =
+        if b = int64 0 then
+            a
+        else
+            loop b (a % b)
+    if a < b then
+        loop b a
+    else
+        loop a b
+
+let makeDivs (n : int) =
+    let divs = new List<int>()
+    let rec loop (i : int) =
+        if i*i > n then
+            ()
+        else
+            if n % i = 0 then
+                divs.Add(i)
+                if i <> 1 && i*i <> n then
+                    divs.Add(n / i)
+            loop (i + 1)
+    loop 1
+    divs.Sort()
+    divs.ToArray()
+
+let makeDivs64 (n : int64) =
+    let divs = new List<int64>()
+    let rec loop (i : int64) =
+        if i*i > int64 n then
+            ()
+        else
+            if n % i = int64 0 then
+                divs.Add(i)
+                if i <> int64 1 && i*i <> n then
+                    divs.Add(n / i)
+            loop (i + int64 1)
+    loop (int64 1)
+    divs.Sort()
+    divs.ToArray()
+
+let makePrimes (n : int) =
+    let primes = new List<int>()
+    let rec loop (i : int) (nums : int[]) =
+        if i * i > n then
+            for i in nums do
+                primes.Add(i)
+            ()
+        else
+            primes.Add(i)
+            let newNums = Array.filter (fun num -> num % i <> 0) nums
+            loop newNums.[0] newNums
+    loop 2 [| 2..n |]
+    primes.ToArray()
+
+let makePrimes64 (n : int64) =
+    let primes = new List<int64>()
+    let rec loop (i : int64) (nums : int64[]) =
+        if i * i > n then
+            for i in nums do
+                primes.Add(i)
+            ()
+        else
+            primes.Add(i)
+            let newNums = Array.filter (fun num -> num % i <> int64 0) nums
+            loop newNums.[0] newNums
+    loop (int64 2) [| int64 2..n |]
+    primes.ToArray()
+
+let primeFact (n : int) =
+    let primes = new List<int>()
+    let rec loop (i : int) (n : int) =
+        if i > n then
+            ()
+        else
+            if n % i = 0 then
+                primes.Add(i)
+                let newN = n / i
+                loop 2 newN
+            else
+                loop (i + 1) n
+    loop 2 n
+    primes.ToArray()
+
+let isPrime64 (n : int64) =
+    if n = int64 1 then false
+    else
+        let rec loop (i : int64) =
+            if i > n then true
+            else
+                if n % i = int64 0 then false
+                else
+                    loop (i + int64 1)
+        loop (int64 (Math.Sqrt (float n)))
+
+let trialDiv64 (n : int64) =
+    let factor = new List<int64>()
+    let max = sqrt (float n) |> int64
+    let rec loop (i : int64) (n : int64) =
+        if i > max then
+            n
+        else
+            if n % i = int64 0 then
+                factor.Add(i)
+                loop i (n / i)
+            else
+                loop (i + int64 1) n
+    let lastN = loop (int64 2) n
+    if lastN <> int64 1 then
+        factor.Add(lastN)
+    factor.ToArray()
+    
 [<EntryPoint>]
 let main _argv =
-    let [| _; m |] = stdin.ReadLine().Split(' ') |> Array.map int
-    let aList = stdin.ReadLine().Split(' ') |> Array.map int
-    let heap = new Heap()
-    for a in aList do
-        heap.Push(a)
-    for _ in 1..m do
-        let a = heap.Pop()
-        heap.Push(a / 2)
-    bigSum (heap.Data.ToArray()) |> printfn "%d"
+    let [| a; b |] = stdin.ReadLine().Split(' ') |> Array.map int64
+    let gcd = makeGcd64 a b
+    
+    let a = trialDiv64 gcd
+    let res = Array.distinct a
+    
+    printfn "%d" (res.Length + 1)
+    
     0 // return an int exit code
