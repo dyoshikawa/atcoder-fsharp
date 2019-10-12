@@ -1,8 +1,5 @@
 // Learn more about F# at http://fsharp.org
 open System
-open System.Collections
-open System.Collections.Generic
-open System.Collections.Generic
 open System.Collections.Generic
 
 let swap (arr : 'a []) a b =
@@ -242,12 +239,7 @@ let trialDiv64 (n : int64) =
     
 [<EntryPoint>]
 let main _argv =
-    let [| a; b |] = stdin.ReadLine().Split(' ') |> Array.map int64
-    let gcd = makeGcd64 a b
+    let [| n; q |] = stdin.ReadLine().Split(' ') |> Array.map int
     
-    let a = trialDiv64 gcd
-    let res = Array.distinct a
-    
-    printfn "%d" (res.Length + 1)
-    
+
     0 // return an int exit code
