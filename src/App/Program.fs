@@ -63,6 +63,7 @@ type Heap() =
                     data
         data <- loop data (data.Count - 1)
 
+
     member this.Pop() =
         let popped = data.[0]
         let lastIndex = data.Count - 1
@@ -110,6 +111,8 @@ type Heap() =
                     data
         data <- loop data 0
         popped
+
+    member this.Exists() = data.Count > 0
 
 let makeGcd (a: int) (b: int) =
     let rec loop (a: int) (b: int) =
@@ -229,7 +232,45 @@ let trialDiv64 (n: int64) =
 
 [<EntryPoint>]
 let main _argv =
-    let [| n; q |] = stdin.ReadLine().Split(' ') |> Array.map int
+    let [| n; m |] = stdin.ReadLine().Split(' ') |> Array.map int
 
+    let jobs: List<int> [] =
+        [| for _ in 0 .. m - 1 -> new List<int>() |]
 
-    0 // return an int exit code
+    let rec loop (i: int) =
+        if i > n - 1 then
+            ()
+        else
+            let [| a; b |] = stdin.ReadLine().Split(' ') |> Array.map int
+            if a > m then
+                loop (i + 1)
+            else
+                jobs.[m - a].Add(b)
+                loop (i + 1)
+
+    loop 0
+
+    let q = new Heap()
+
+    let rec loop (i: int) (sum: int) =
+        if i < 0 then
+            sum
+        else
+            let job = jobs.[i]
+
+            let rec loop1 (j: int) =
+                //                printfn "%d" j
+                if j > job.Count - 1 then
+                    ()
+                else
+                    q.Push(job.[j])
+                    loop1 (j + 1)
+            loop1 0
+            let newSum =
+                if q.Exists() then sum + q.Pop()
+                else sum
+            loop (i - 1) newSum
+
+    let res = loop (m - 1) 0
+    printfn "%d" res
+    0
