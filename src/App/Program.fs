@@ -64,6 +64,7 @@ type Heap() =
         data <- loop data (data.Count - 1)
 
 
+
     member this.Pop() =
         let popped = data.[0]
         let lastIndex = data.Count - 1
@@ -230,20 +231,23 @@ let trialDiv64 (n: int64) =
     if lastN <> int64 1 then factor.Add(lastN)
     factor.ToArray()
 
-type Dfs(n : int, graph: List<int> []) =
+type Dfs(n: int, graph: List<int> []) =
     let graph = graph
-    let seen = [| for _ in 0..n-1 -> false |]
-    
-    member this.Execute(v : int) =
+
+    let seen =
+        [| for _ in 0 .. n - 1 -> false |]
+
+    member this.Execute(v: int) =
         seen.[v] <- true
-        printfn "%d" v
-        
-        let rec loop (i : int) : unit =
+        // printfn "%d" v
+
+        let rec loop (i: int): unit =
             if i > graph.[v].Count - 1 then
                 ()
             else
                 let nextV = graph.[v].[i]
-                if seen.[nextV] then loop (i + 1)
+                if seen.[nextV] then
+                    loop (i + 1)
                 else
                     this.Execute(nextV)
                     loop (i + 1)
@@ -252,16 +256,17 @@ type Dfs(n : int, graph: List<int> []) =
 [<EntryPoint>]
 let main _argv =
     let [| n; m |] = stdin.ReadLine().Split(' ') |> Array.map int
-//    let n = stdin.ReadLine() |> int64
-        
-    let graph : List<int> [] = [| for _ in 0 .. n - 1 -> new List<int>() |]
-    
+    //    let n = stdin.ReadLine() |> int64
+
+    let graph: List<int> [] =
+        [| for _ in 0 .. n - 1 -> new List<int>() |]
+
     for i in 0 .. m - 1 do
         let [| a; b |] = stdin.ReadLine().Split(' ') |> Array.map int
-        graph.[a-1].Add(b-1)
-    
+        graph.[a - 1].Add(b - 1)
+
     let dfs = new Dfs(n, graph)
-    
+
     dfs.Execute(0)
-    
+
     0
