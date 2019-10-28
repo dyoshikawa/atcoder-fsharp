@@ -230,47 +230,38 @@ let trialDiv64 (n: int64) =
     if lastN <> int64 1 then factor.Add(lastN)
     factor.ToArray()
 
+type Dfs(n : int, graph: List<int> []) =
+    let graph = graph
+    let seen = [| for _ in 0..n-1 -> false |]
+    
+    member this.Execute(v : int) =
+        seen.[v] <- true
+        printfn "%d" v
+        
+        let rec loop (i : int) : unit =
+            if i > graph.[v].Count - 1 then
+                ()
+            else
+                let nextV = graph.[v].[i]
+                if seen.[nextV] then loop (i + 1)
+                else
+                    this.Execute(nextV)
+                    loop (i + 1)
+        loop 0
+
 [<EntryPoint>]
 let main _argv =
     let [| n; m |] = stdin.ReadLine().Split(' ') |> Array.map int
-
-    let jobs: List<int> [] =
-        [| for _ in 0 .. m - 1 -> new List<int>() |]
-
-    let rec loop (i: int) =
-        if i > n - 1 then
-            ()
-        else
-            let [| a; b |] = stdin.ReadLine().Split(' ') |> Array.map int
-            if a > m then
-                loop (i + 1)
-            else
-                jobs.[m - a].Add(b)
-                loop (i + 1)
-
-    loop 0
-
-    let q = new Heap()
-
-    let rec loop (i: int) (sum: int) =
-        if i < 0 then
-            sum
-        else
-            let job = jobs.[i]
-
-            let rec loop1 (j: int) =
-                //                printfn "%d" j
-                if j > job.Count - 1 then
-                    ()
-                else
-                    q.Push(job.[j])
-                    loop1 (j + 1)
-            loop1 0
-            let newSum =
-                if q.Exists() then sum + q.Pop()
-                else sum
-            loop (i - 1) newSum
-
-    let res = loop (m - 1) 0
-    printfn "%d" res
+//    let n = stdin.ReadLine() |> int64
+        
+    let graph : List<int> [] = [| for _ in 0 .. n - 1 -> new List<int>() |]
+    
+    for i in 0 .. m - 1 do
+        let [| a; b |] = stdin.ReadLine().Split(' ') |> Array.map int
+        graph.[a-1].Add(b-1)
+    
+    let dfs = new Dfs(n, graph)
+    
+    dfs.Execute(0)
+    
     0
