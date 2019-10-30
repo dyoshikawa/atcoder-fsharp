@@ -66,6 +66,8 @@ type Heap() =
 
 
 
+
+
     member this.Pop() =
         let popped = data.[0]
         let lastIndex = data.Count - 1
